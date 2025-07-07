@@ -1,0 +1,317 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои проекты и задачи</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background-color: #0f1115;
+            color: #e4e6eb;
+            font-family: 'Inter', 'Roboto Mono', sans-serif;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        .dashboard-header h1 {
+            font-weight: 600;
+            font-size: 2rem;
+            color: #ffffff;
+            border-bottom: 2px solid #3b3f46;
+            display: inline-block;
+            padding-bottom: 0.4rem;
+        }
+        .datetime-elegant {
+            position: absolute;
+            left: 2.2rem;
+            top: 1.2rem;
+            z-index: 10;
+            min-width: 270px;
+            padding: 1.3rem 2.2rem;
+            background: linear-gradient(135deg, #181b20 80%, #23272b 100%);
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 32px 0 rgba(20, 22, 30, 0.18), 0 1.5px 8px 0 rgba(0,0,0,0.10);
+            color: #e4e6eb;
+            font-size: 1.65rem;
+            font-family: 'Inter', 'Poppins', Arial, sans-serif;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            border: 1.5px solid #3b3f46;
+            text-shadow: none;
+            display: flex;
+            align-items: center;
+            gap: 1.1rem;
+            transition: box-shadow 0.3s;
+        }
+        .datetime-elegant .bi-clock {
+            font-size: 2.2rem;
+            color: #6cb4ff;
+            opacity: 0.85;
+        }
+        .project-viewer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+        .project-arrow {
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            background: #1b1e24;
+            border: 1px solid #2c3038;
+            color: #6cb4ff;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .project-arrow:hover {
+            background: #6cb4ff;
+            color: #fff;
+            transform: scale(1.05);
+        }
+        .project-card {
+            width: 100%;
+            max-width: 700px;
+            background: #1a1d23;
+            border: 1px solid #2c3038;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 0 16px rgba(0, 0, 0, 0.4);
+            text-align: left;
+        }
+        .project-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #6cb4ff;
+            margin-bottom: 0.5rem;
+        }
+        .project-desc {
+            font-size: 1.1rem;
+            color: #c4c6cc;
+            margin-bottom: 1rem;
+        }
+        .project-date {
+            font-size: 0.95rem;
+            color: #9fa4ae;
+        }
+        .tasks-section {
+            margin-bottom: 2rem;
+        }
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        .task-card {
+            background: #181b20;
+            border: 1px solid #2c3038;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .task-card:hover {
+            border-color: #6cb4ff;
+            background: #1f2228;
+        }
+        .task-card.danger {
+            border-left: 5px solid #e05d5d;
+        }
+        .task-card.warning {
+            border-left: 5px solid #e0a85d;
+        }
+        .task-card.success {
+            border-left: 5px solid #5de08e;
+        }
+        .task-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: #f1f1f1;
+        }
+        .task-date {
+            font-size: 1rem;
+            color: #9fa4ae;
+        }
+        .task-status {
+            margin-top: 0.4rem;
+            display: inline-block;
+            font-size: 0.9rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.4rem;
+            background-color: #2e323c;
+            color: #cfd3db;
+            font-weight: 500;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        .status-dot.danger { background: #e05d5d; }
+        .status-dot.warning { background: #e0a85d; }
+        .status-dot.success { background: #5de08e; }
+        @media (max-width: 900px) {
+            .project-viewer { flex-direction: column; gap: 1rem; }
+            .tasks-grid { grid-template-columns: 1fr; }
+            .datetime-elegant { position: static; margin-bottom: 1.5rem; }
+        }
+    </style>
+    <style>
+        .main-dashboard-container {
+            margin-top: 1.5rem;
+        }
+        .datetime-elegant, .analytics-tile {
+            background: linear-gradient(135deg, #181b20 80%, #23272b 100%);
+            border-radius: 1.5rem;
+            border: 1.5px solid #3b3f46;
+            color: #e4e6eb;
+            font-family: 'Inter', 'Poppins', Arial, sans-serif;
+            box-shadow: 0 4px 32px 0 rgba(20, 22, 30, 0.18), 0 1.5px 8px 0 rgba(0,0,0,0.10);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 160px;
+            min-height: 90px;
+            padding: 1.3rem 2.2rem;
+            margin: 0;
+            transition: box-shadow 0.2s;
+        }
+        .datetime-elegant {
+            position: static !important;
+            z-index: auto !important;
+        }
+        .analytics-tile {
+            font-size: 1.1rem;
+            font-weight: 600;
+            gap: 0.3rem;
+        }
+        .analytics-tile:hover {
+            box-shadow: 0 6px 36px 0 rgba(20, 22, 30, 0.22);
+        }
+        .analytics-title {
+            font-size: 1.02rem;
+            color: #b0b4bb;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .analytics-value {
+            font-size: 2.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .analytics-value.text-success { color: #5de08e; }
+        .analytics-value.text-danger { color: #e05d5d; }
+        @media (max-width: 900px) {
+            .main-dashboard-container { margin-top: 1.5rem; }
+            .analytics-tiles { flex-direction: column !important; gap: 0.8rem !important; }
+        }
+        @media (min-width: 901px) {
+            .container-fluid .row {
+                justify-content: flex-end !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Остальная часть остаётся без изменений -->
+
+<div class="container-fluid px-4 pt-4">
+  <div class="row justify-content-end align-items-stretch flex-nowrap flex-md-nowrap mb-4" style="gap: 1.5rem;">
+    <div class="col-auto p-0" style="min-width: 320px;">
+      <div id="datetime-box" class="datetime-elegant mb-0">
+        <i class="bi bi-clock"></i>
+        <span id="current-datetime"></span>
+      </div>
+    </div>
+    <div class="col d-flex flex-row flex-wrap flex-md-nowrap align-items-stretch analytics-tiles justify-content-end" style="gap: 1.2rem; min-width: 0;">
+      <div class="analytics-tile mb-2 mb-md-0">
+        <div class="analytics-title mb-1">Всего задач</div>
+        <div class="analytics-value mb-0" id="analytics-total">{{ analytics_total }}</div>
+      </div>
+      <div class="analytics-tile mb-2 mb-md-0">
+        <div class="analytics-title mb-1">Выполнено</div>
+        <div class="analytics-value mb-0 text-success" id="analytics-done">{{ analytics_done }}</div>
+      </div>
+      <div class="analytics-tile mb-2 mb-md-0">
+        <div class="analytics-title mb-1">Просрочено</div>
+        <div class="analytics-value mb-0 text-danger" id="analytics-overdue">{{ analytics_overdue }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container py-4 main-dashboard-container">
+    <div class="dashboard-header">
+    </div>
+    <div class="project-viewer">
+        {% if current_project %}
+        <div class="project-card">
+            <div class="project-title"><i class="bi bi-folder2-open"></i> {{ current_project.name }}</div>
+            <div class="project-desc">{{ current_project.description|default:'Без описания' }}</div>
+            <div class="project-date"><i class="bi bi-calendar3"></i> {{ current_project.created_at|date:"d.m.Y H:i" }}</div>
+        </div>
+        {% else %}
+        <div class="project-card text-center">Нет проектов для отображения.</div>
+        {% endif %}
+    </div>
+    <div class="tasks-section">
+        <div class="tasks-grid">
+            {% for task in tasks %}
+            <div class="task-card {{ task.color }}">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="status-dot {{ task.color }} me-2"></span>
+                    <span class="task-title">{{ task.obj.title }}</span>
+                </div>
+                <div class="task-date">
+                    <i class="bi bi-calendar-event"></i> <span class="fw-bold">{{ task.obj.deadline|date:"d.m.Y" }}</span>
+                </div>
+                <span class="task-status">{{ task.obj.get_status_display }}</span>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">Нет задач для этого проекта.</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<script>
+    function updateDateTime() {
+        const now = new Date();
+        const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+        const day = days[now.getDay()];
+        const date = now.toLocaleDateString('ru-RU');
+        const time = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        $('#current-datetime').text(`${day}, ${date} ${time}`);
+    }
+    $(function() {
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        // Автоматическое листание проектов каждые 3 секунды
+        setInterval(function() {
+            let current = {{ current_index }};
+            let count = {{ project_count }};
+            if (count > 1) {
+                let next = (current + 1) % count;
+                const url = new URL(window.location.href);
+                url.searchParams.set('project', next);
+                window.location.href = url.toString();
+            }
+        }, 3000);
+    });
+</script>
+</body>
+</html> 
