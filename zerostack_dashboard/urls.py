@@ -18,9 +18,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from project_dashboard.views import dashboard_view
+from project_dashboard.views import dashboard_view, project_panel_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", dashboard_view, name="dashboard"),
+    path("project_panel/", project_panel_view, name="project_panel"),
 ]

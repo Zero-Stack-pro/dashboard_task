@@ -168,8 +168,6 @@
             .tasks-grid { grid-template-columns: 1fr; }
             .datetime-elegant { position: static; margin-bottom: 1.5rem; }
         }
-    </style>
-    <style>
         .main-dashboard-container {
             margin-top: 1.5rem;
         }
@@ -224,11 +222,29 @@
                 justify-content: flex-end !important;
             }
         }
+        .fade-animate {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 2s ease, transform 2s ease;
+        }
+        .fade-animate.fade-in {
+            opacity: 0;
+            transform: scale(2);
+            animation: fadeInSimple 2s ease forwards;
+        }
+        @keyframes fadeInSimple {
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
-<!-- Остальная часть остаётся без изменений -->
-
 <div class="container-fluid px-4 pt-4">
   <div class="row justify-content-end align-items-stretch flex-nowrap flex-md-nowrap mb-4" style="gap: 1.5rem;">
     <div class="col-auto p-0" style="min-width: 320px;">
@@ -237,23 +253,26 @@
         <span id="current-datetime"></span>
       </div>
     </div>
-    <div class="col d-flex flex-row flex-wrap flex-md-nowrap align-items-stretch analytics-tiles justify-content-end" style="gap: 1.2rem; min-width: 0;">
-      <div class="analytics-tile mb-2 mb-md-0">
-        <div class="analytics-title mb-1">Всего задач</div>
-        <div class="analytics-value mb-0" id="analytics-total">{{ analytics_total }}</div>
-      </div>
-      <div class="analytics-tile mb-2 mb-md-0">
-        <div class="analytics-title mb-1">Выполнено</div>
-        <div class="analytics-value mb-0 text-success" id="analytics-done">{{ analytics_done }}</div>
-      </div>
-      <div class="analytics-tile mb-2 mb-md-0">
-        <div class="analytics-title mb-1">Просрочено</div>
-        <div class="analytics-value mb-0 text-danger" id="analytics-overdue">{{ analytics_overdue }}</div>
+    <div class="col p-0">
+      <div class="d-flex flex-row flex-wrap flex-md-nowrap align-items-stretch analytics-tiles justify-content-end" style="gap: 1.2rem; min-width: 0;">
+        <div class="analytics-tile mb-2 mb-md-0">
+          <div class="analytics-title mb-1">Всего задач</div>
+          <div class="analytics-value mb-0" id="analytics-total">{{ analytics_total }}</div>
+        </div>
+        <div class="analytics-tile mb-2 mb-md-0">
+          <div class="analytics-title mb-1">Выполнено</div>
+          <div class="analytics-value mb-0 text-success" id="analytics-done">{{ analytics_done }}</div>
+        </div>
+        <div class="analytics-tile mb-2 mb-md-0">
+          <div class="analytics-title mb-1">Просрочено</div>
+          <div class="analytics-value mb-0 text-danger" id="analytics-overdue">{{ analytics_overdue }}</div>
+        </div>
       </div>
     </div>
   </div>
 </div>
-<div class="container py-4 main-dashboard-container">
+<div class="container main-dashboard-container">
+  <div id="project-panel" class="fade-animate">
     <div class="dashboard-header">
     </div>
     <div class="project-viewer">
@@ -287,8 +306,11 @@
             {% endfor %}
         </div>
     </div>
+  </div>
 </div>
 <script>
+    let currentProjectIndex = {{ current_index }};
+    const projectCount = {{ project_count }};
     function updateDateTime() {
         const now = new Date();
         const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
@@ -297,20 +319,33 @@
         const time = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         $('#current-datetime').text(`${day}, ${date} ${time}`);
     }
+    function updateAnalyticsTiles(data) {
+        $('#analytics-total').text(data.analytics_total);
+        $('#analytics-done').text(data.analytics_done);
+        $('#analytics-overdue').text(data.analytics_overdue);
+    }
+    function switchProjectAjax(next) {
+        if (isNaN(next) || next < 0) next = 0;
+        const $panel = $('#project-panel');
+        $.get('/project_panel/', { project: next }, function(data) {
+            $panel.html(data.html);
+            updateAnalyticsTiles(data);
+            currentProjectIndex = data.current_index;
+            $panel.removeClass('fade-in');
+            void $panel[0].offsetWidth; // force reflow to restart animation
+            $panel.addClass('fade-in');
+        });
+    }
     $(function() {
         updateDateTime();
         setInterval(updateDateTime, 1000);
-        // Автоматическое листание проектов каждые 3 секунды
+        // Автоматическое листание проектов каждые 3 секунды через AJAX
         setInterval(function() {
-            let current = {{ current_index }};
-            let count = {{ project_count }};
-            if (count > 1) {
-                let next = (current + 1) % count;
-                const url = new URL(window.location.href);
-                url.searchParams.set('project', next);
-                window.location.href = url.toString();
+            if (projectCount > 1) {
+                let next = (currentProjectIndex + 1) % projectCount;
+                switchProjectAjax(next);
             }
-        }, 3000);
+        }, 15000);
     });
 </script>
 </body>

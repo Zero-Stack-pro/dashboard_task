@@ -1,0 +1,33 @@
+<div class="dashboard-header">
+</div>
+<div class="project-viewer">
+    {% if current_project %}
+    <div class="project-card">
+        <div class="project-title"><i class="bi bi-folder2-open"></i> {{ current_project.name }}</div>
+        <div class="project-desc">{{ current_project.description|default:'Без описания' }}</div>
+        <div class="project-date"><i class="bi bi-calendar3"></i> {{ current_project.created_at|date:"d.m.Y H:i" }}</div>
+    </div>
+    {% else %}
+    <div class="project-card text-center">Нет проектов для отображения.</div>
+    {% endif %}
+</div>
+<div class="tasks-section">
+    <div class="tasks-grid">
+        {% for task in tasks %}
+        <div class="task-card {{ task.color }}">
+            <div class="d-flex align-items-center mb-2">
+                <span class="status-dot {{ task.color }} me-2"></span>
+                <span class="task-title">{{ task.obj.title }}</span>
+            </div>
+            <div class="task-date">
+                <i class="bi bi-calendar-event"></i> <span class="fw-bold">{{ task.obj.deadline|date:"d.m.Y" }}</span>
+            </div>
+            <span class="task-status">{{ task.obj.get_status_display }}</span>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">Нет задач для этого проекта.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div> 
